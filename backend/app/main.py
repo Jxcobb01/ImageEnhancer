@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Response
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import io
@@ -19,13 +19,18 @@ app.add_middleware(
 async def read_root():
     return {"message": "AI Image Enhancer API"}
 
-@app.post("/enhance")
+@app.post("/api/enhance")
 async def enhance_image(file: UploadFile = File(...)):
     # Read the uploaded image
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
-    
-    # TODO: Implement image enhancement logic here
-    
-    # For now, return the original image
-    return {"message": "Image enhancement endpoint"} 
+
+    # Dummy enhancement: convert to grayscale (replace with real enhancement)
+    enhanced_image = image.convert("L").convert("RGB")
+
+    # Save to bytes
+    buf = io.BytesIO()
+    enhanced_image.save(buf, format="PNG")
+    buf.seek(0)
+
+    return Response(content=buf.read(), media_type="image/png") 
